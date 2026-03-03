@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Albion Crafting Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #e94560;
+            font-size: 1.5rem;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-title {
+            color: #0f3460;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #e94560;
+            border-radius: 2px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 0 2px #e94560;
+        }
+        
+        input::placeholder {
+            color: #666;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #e94560 0%, #c73e54 100%);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #0f3460 0%, #0a2540 100%);
+            margin-top: 5px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+        }
+        
+        .result-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .stat-value.profit {
+            color: #4ade80;
+        }
+        
+        .stat-value.loss {
+            color: #f87171;
+        }
+        
+        .detail-table {
+            width: 100%;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+        
+        .detail-table td {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .detail-table td:last-child {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .detail-table .total-row {
+            font-weight: bold;
+            color: #e94560;
+            border-top: 2px solid #e94560;
+            border-bottom: none;
+        }
+        
+        .bahan-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bahan-info {
+            flex: 1;
+        }
+        
+        .bahan-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .bahan-detail {
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        .bahan-cost {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .delete-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .tier-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .tier-4 { background: #8b5cf6; }
+        .tier-5 { background: #3b82f6; }
+        .tier-6 { background: #10b981; }
+        .tier-7 { background: #f59e0b; }
+        .tier-8 { background: #ef4444; }
+        
+        .tips-box {
+            background: rgba(15, 52, 96, 0.3);
+            border-left: 4px solid #e94560;
+            padding: 12px;
+            border-radius: 0 10px 10px 0;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+        
+        .tips-title {
+            color: #e94560;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        
+        .step.active {
+            background: #e94560;
+        }
+        
+        .step.completed {
+            background: #10b981;
+        }
+        
+        .saran-harga {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .harga-box {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .harga-label {
+            font-size: 0.7rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .harga-value {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #4ade80;
+        }
+        
+        .harga-box.recommended {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid #4ade80;
+        }
+        
+        @media (max-width: 400px) {
+            h1 { font-size: 1.2rem; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .saran-harga { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ Albion Crafting Calc</h1>
+        
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active" id="step1">1</div>
+            <div class="step" id="step2">2</div>
+            <div class="step" id="step3">3</div>
+            <div class="step" id="step4">4</div>
+        </div>
+        
+        <!-- STEP 1: Member & Item -->
+        <div id="section1" class="card">
+            <div class="card-title">Member & Item</div>
+            
+            <div class="form-group">
+                <label>Status Member</label>
+                <select id="memberStatus">
+                    <option value="premium">Premium (Tax 4%)</option>
+                    <option value="nonpremium">Non-Premium (Tax 8%)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Nama Item</label>
+                <input type="text" id="itemName" placeholder="Contoh: T6 Bag">
+            </div>
+            
+            <div class="form-group">
+                <label>Tier Item</label>
+                <select id="itemTier">
+                    <option value="4">T4</option>
+                    <option value="5">T5</option>
+                    <option value="6" selected>T6</option>
+                    <option value="7">T7</option>
+                    <option value="8">T8</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Harga Jual di Market</label>
+                <input type="number" id="sellPrice" placeholder="Contoh: 50000">
+            </div>
+            
+            <button class="btn" onclick="goToStep(2)">Lanjut →</button>
+        </div>
+        
+        <!-- STEP 2: Crafting Settings -->
+        <div id="section2" class="card hidden">
+            <div class="card-title">Pengaturan Crafting</div>
+            
+            <div class="form-group">
+                <label>Jumlah Craft Awal</label>
+                <input type="number" id="craftAmount" value="100" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label>Return Rate %</label>
+                <select id="returnRate">
+                    <option value="15">15% - City (No Focus)</option>
+                    <option value="21">21% - City + Bonus</option>
+                    <option value="25">25% - With Focus</option>
+                    <option value="36">36% - Hideout (T5)</option>
+                    <option value="42">42% - Hideout (T6)</option>
+                    <option value="45">45% - Hideout (T7+)</option>
+                    <option value="48">48% - Hideout Max</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Usage Fee Station %</label>
+                <input type="number" id="usageFee" value="10" min="0" max="50">
+            </div>
+            
+            <div class="form-group">
+                <label>Gunakan Journal?</label>
+                <select id="useJournal">
+                    <option value="0">Tidak</option>
+                    <option value="1">Ya (T5+ only)</option>
+                </select>
+            </div>
+            
+            <div class="form-group hidden" id="journalPriceGroup">
+                <label>Harga Journal Terisi</label>
+                <input type="number" id="journalPrice" placeholder="Contoh: 3000">
+            </div>
+            
+            <button class="btn btn-secondary" onclick="goToStep(1)">← Kembali</button>
+            <button class="btn" onclick="goToStep(3)">Lanjut →</button>
+        </div>
+        
+        <!-- STEP 3: Input Bahan -->
+        <div id="section3" class="card hidden">
+            <div class="card-title">Tambah Bahan</div>
+            
+            <div class="form-group">
+                <label>Nama Bahan</label>
+                <input type="text" id="matName" placeholder="Contoh: T6 Cloth">
+            </div>
+            
+            <div class="form-group">
+                <label>Tier Bahan</label>
+                <select id="matTier">
+                    <option value="4">T4</option>
+                    <option value="5">T5</option>
+                    <option value="6" selected>T6</option>
+                    <option value="7">T7</option>
+                    <option value="8">T8</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Harga di Market / Unit</label>
+                <input type="number" id="matPrice" placeholder="Contoh: 500">
+            </div>
+            
+            <div class="form-group">
+                <label>Jumlah per Craft</label>
+                <input type="number" id="matAmount" value="1" min="1">
+            </div>
+            
+            <button class="btn btn-secondary" onclick="addMaterial()">+ Tambah Bahan</button>
+            
+            <div id="materialList" style="margin-top: 15px;"></div>
+            
+            <button class="btn btn-secondary" onclick="goToStep(2)">← Kembali</button>
+            <button class="btn" onclick="goToStep(4)" id="btnCalculate" disabled>Hitung Profit →</button>
+        </div>
+        
+        <!-- STEP 4: Hasil -->
+        <div id="section4" class="result-section">
+            <div class="card">
+                <div class="card-title">Hasil Crafting</div>
+                
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Item Jadi</div>
+                        <div class="stat-value" id="resTotalItems">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Efisiensi</div>
+                        <div class="stat-value" id="resEfficiency">+0%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Iterasi</div>
+                        <div class="stat-value" id="resIterations">0x</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Modal Awal</div>
+                        <div class="stat-value" id="resModal">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Financial Breakdown</div>
+                
+                <table class="detail-table">
+                    <tr>
+                        <td>Biaya Bahan (Market)</td>
+                        <td id="costMaterials">Rp 0</td>
+                    </tr>
+                    <tr>
+                        <td>Usage Fee Station</td>
+                        <td id="costUsage">Rp 0</td>
+                    </tr>
+                    <tr>
+                        <td>Market Tax</td>
+                        <td id="costTax">Rp 0</td>
+                    </tr>
+                    <tr>
+                        <td>Setup Fee (1.5%)</td>
+                        <td id="costSetup">Rp 0</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TOTAL BIAYA</td>
+                        <td id="costTotal">Rp 0</td>
+                    </tr>
+                </table>
+                
+                <table class="detail-table" style="margin-top: 10px;">
+                    <tr>
+                        <td>Penjualan Item</td>
+                        <td id="revItems">Rp 0</td>
+                    </tr>
+                    <tr id="revJournalRow">
+                        <td>Penjualan Journal</td>
+                        <td id="revJournal">Rp 0</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>TOTAL PENDAPATAN</td>
+                        <td id="revTotal">Rp 0</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Keuntungan</div>
+                
+                <div class="stat-box" style="margin-bottom: 15px;">
+                    <div class="stat-label">KEUNTUNGAN BERSIH</div>
+                    <div class="stat-value" id="netProfit" style="font-size: 1.5rem;">Rp 0</div>
+                </div>
+                
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Profit/Item</div>
+                        <div class="stat-value" id="profitPerItem">Rp 0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ROI</div>
+                        <div class="stat-value" id="roiPercent">0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Saran Harga Jual</div>
+                <div class="saran-harga">
+                    <div class="harga-box">
+                        <div class="harga-label">Break Even</div>
+                        <div class="harga-value" id="priceBreakEven">0</div>
+                    </div>
+                    <div class="harga-box recommended">
+                        <div class="harga-label">Quick Sell +5%</div>
+                        <div class="harga-value" id="priceQuick">0</div>
+                    </div>
+                    <div class="harga-box">
+                        <div class="harga-label">Optimal +15%</div>
+                        <div class="harga-value" id="priceOptimal">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tips-box">
+                <div class="tips-title">💡 Tips Albion</div>
+                <div id="tipsContent">Craft di Hideout untuk profit maksimal!</div>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="resetApp()">← Hitung Lagi</button>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let materials = [];
+        let currentStep = 1;
+        
+        // Format currency
+        function formatMoney(num) {
+            return 'Rp ' + num.toLocaleString('id-ID');
+        }
+        
+        // Step navigation
+        function goToStep(step) {
+            // Hide all sections
+            document.getElementById('section1').classList.add('hidden');
+            document.getElementById('section2').classList.add('hidden');
+            document.getElementById('section3').classList.add('hidden');
+            document.getElementById('section4').classList.remove('result-section');
+            document.getElementById('section4').classList.add('hidden');
+            
+            // Update step indicators
+            for(let i = 1; i <= 4; i++) {
+                document.getElementById('step' + i).classList.remove('active', 'completed');
+                if(i < step) document.getElementById('step' + i).classList.add('completed');
+                if(i === step) document.getElementById('step' + i).classList.add('active');
+            }
+            
+            // Show target section
+            if(step === 4) {
+                document.getElementById('section4').classList.remove('hidden');
+                document.getElementById('section4').classList.add('result-section');
+                calculateProfit();
+            } else {
+                document.getElementById('section' + step).classList.remove('hidden');
+            }
+            
+            currentStep = step;
+        }
+        
+        // Journal toggle
+        document.getElementById('useJournal').addEventListener('change', function() {
+            const tier = parseInt(document.getElementById('itemTier').value);
+            const show = this.value === '1' && tier >= 5;
+            document.getElementById('journalPriceGroup').classList.toggle('hidden', !show);
+        });
+        
+        // Add material
+        function addMaterial() {
+            const name = document.getElementById('matName').value || 'Unknown';
+            const tier = parseInt(document.getElementById('matTier').value);
+            const price = parseInt(document.getElementById('matPrice').value) || 0;
+            const amount = parseInt(document.getElementById('matAmount').value) || 1;
+            
+            if(price <= 0) {
+                alert('Masukkan harga bahan!');
+                return;
+            }
+            
+            materials.push({name, tier, price, amount});
+            renderMaterials();
+            
+            // Clear inputs
+            document.getElementById('matName').value = '';
+            document.getElementById('matPrice').value = '';
+            document.getElementById('matAmount').value = '1';
+            document.getElementById('matName').focus();
+        }
+        
+        // Render materials list
+        function renderMaterials() {
+            const list = document.getElementById('materialList');
+            list.innerHTML = '';
+            
+            let totalCost = 0;
+            
+            materials.forEach((mat, index) => {
+                const cost = mat.price * mat.amount;
+                totalCost += cost;
+                
+                const div = document.createElement('div');
+                div.className = 'bahan-item';
+                div.innerHTML = `
+                    <div class="bahan-info">
+                        <div class="bahan-name">
+                            ${mat.name}
+                            <span class="tier-badge tier-${mat.tier}">T${mat.tier}</span>
+                        </div>
+                        <div class="bahan-detail">${mat.amount} x ${formatMoney(mat.price)}</div>
+                    </div>
+                    <div class="bahan-cost">
+                        ${formatMoney(cost)}
+                        <button class="delete-btn" onclick="deleteMaterial(${index})">×</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            
+            // Add total
+            if(materials.length > 0) {
+                const totalDiv = document.createElement('div');
+                totalDiv.style = 'text-align: right; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-weight: bold; color: #e94560;';
+                totalDiv.innerHTML = `Total per Craft: ${formatMoney(totalCost)}`;
+                list.appendChild(totalDiv);
+            }
+            
+            document.getElementById('btnCalculate').disabled = materials.length === 0;
+        }
+        
+        // Delete material
+        function deleteMaterial(index) {
+            materials.splice(index, 1);
+            renderMaterials();
+        }
+        
+        // Calculate crafting with return rate
+        function calculateCrafting(bahanAwal, returnRate) {
+            let totalItem = 0;
+            let iterasi = 0;
+            let sisaBahan = bahanAwal;
+            
+            while(sisaBahan >= 1) {
+                iterasi++;
+                const itemDibuat = Math.floor(sisaBahan);
+                totalItem += itemDibuat;
+                
+                const bahanReturn = itemDibuat * (returnRate / 100);
+                sisaBahan = bahanReturn;
+                
+                if(iterasi > 1000) break;
+            }
+            
+            return {totalItem, iterasi, sisaBahan};
+        }
+        
+        // Main calculation
+        function calculateProfit() {
+            // Get inputs
+            const isPremium = document.getElementById('memberStatus').value === 'premium';
+            const taxRate = isPremium ? 4 : 8;
+            const sellPrice = parseInt(document.getElementById('sellPrice').value) || 0;
+            const craftAmount = parseInt(document.getElementById('craftAmount').value) || 1;
+            const returnRate = parseFloat(document.getElementById('returnRate').value) || 15;
+            const usageFeePercent = parseInt(document.getElementById('usageFee').value) || 0;
+            const useJournal = document.getElementById('useJournal').value === '1';
+            const itemTier = parseInt(document.getElementById('itemTier').value);
+            const journalPrice = useJournal && itemTier >= 5 ? (parseInt(document.getElementById('journalPrice').value) || 0) : 0;
+            
+            // Calculate material cost per craft
+            let materialCostPerCraft = 0;
+            materials.forEach(m => {
+                materialCostPerCraft += m.price * m.amount;
+            });
+            
+            // Calculate with return rate
+            const craftResult = calculateCrafting(craftAmount, returnRate);
+            const totalItems = craftResult.totalItem;
+            
+            // Modal & costs
+            const modalBahan = materialCostPerCraft * craftAmount;
+            const usageFee = Math.floor((materialCostPerCraft * craftAmount) * usageFeePercent / 100);
+            const totalProductionCost = modalBahan + usageFee;
+            
+            // Market costs (per item sold)
+            const marketTaxPerItem = Math.floor(sellPrice * taxRate / 100);
+            const setupFeePerItem = Math.floor(sellPrice * 1.5 / 100);
+            const totalMarketCost = (marketTaxPerItem + setupFeePerItem) * totalItems;
+            
+            // Revenue
+            const revenueItems = sellPrice * totalItems;
+            const revenueJournal = journalPrice * totalItems;
+            const totalRevenue = revenueItems + revenueJournal;
+            
+            // Total costs
+            const totalCost = totalProductionCost + totalMarketCost;
+            const netProfit = totalRevenue - totalCost;
+            const profitPerItem = totalItems > 0 ? Math.floor(netProfit / totalItems) : 0;
+            const roi = totalCost > 0 ? ((netProfit / totalCost) * 100).toFixed(2) : 0;
+            
+            // Break even price
+            const costPerItem = totalCost / (totalItems || 1);
+            const totalTaxRate = (taxRate + 1.5) / 100;
+            let breakEven = Math.ceil(costPerItem / (1 - totalTaxRate));
+            breakEven = Math.ceil(breakEven / 100) * 100; // Round to 100
+            
+            // Display results
+            document.getElementById('resTotalItems').textContent = totalItems;
+            document.getElementById('resEfficiency').textContent = '+' + (totalItems - craftAmount) + ' (+' + Math.round((totalItems - craftAmount) * 100 / craftAmount) + '%)';
+            document.getElementById('resIterations').textContent = craftResult.iterasi + 'x';
+            document.getElementById('resModal').textContent = formatMoney(modalBahan);
+            
+            document.getElementById('costMaterials').textContent = formatMoney(modalBahan);
+            document.getElementById('costUsage').textContent = formatMoney(usageFee) + ' (' + usageFeePercent + '%)';
+            document.getElementById('costTax').textContent = formatMoney(marketTaxPerItem * totalItems) + ' (' + taxRate + '%)';
+            document.getElementById('costSetup').textContent = formatMoney(setupFeePerItem * totalItems);
+            document.getElementById('costTotal').textContent = formatMoney(totalCost);
+            
+            document.getElementById('revItems').textContent = formatMoney(revenueItems);
+            document.getElementById('revJournalRow').style.display = revenueJournal > 0 ? 'table-row' : 'none';
+            document.getElementById('revJournal').textContent = formatMoney(revenueJournal);
+            document.getElementById('revTotal').textContent = formatMoney(totalRevenue);
+            
+            const profitEl = document.getElementById('netProfit');
+            profitEl.textContent = (netProfit >= 0 ? '+' : '') + formatMoney(netProfit);
+            profitEl.className = 'stat-value ' + (netProfit >= 0 ? 'profit' : 'loss');
+            
+            document.getElementById('profitPerItem').textContent = formatMoney(profitPerItem);
+            const roiEl = document.getElementById('roiPercent');
+            roiEl.textContent = roi + '%';
+            roiEl.className = 'stat-value ' + (roi >= 0 ? 'profit' : 'loss');
+            
+            document.getElementById('priceBreakEven').textContent = formatMoney(breakEven);
+            document.getElementById('priceQuick').textContent = formatMoney(Math.ceil(breakEven * 1.05 / 100) * 100);
+            document.getElementById('priceOptimal').textContent = formatMoney(Math.ceil(breakEven * 1.15 / 100) * 100);
+            
+            // Tips
+            let tips = '';
+            if(returnRate >= 35) {
+                tips = 'Craft di Hideout = Profit Maksimal! Return rate tinggi memungkinkan craft lebih banyak dengan bahan yang sama.';
+            } else if(returnRate >= 25) {
+                tips = 'Gunakan Focus Point untuk efisiensi maksimal. Pertimbangkan untuk craft di Hideout tier tinggi.';
+            } else {
+                tips = 'Return rate rendah. Sebaiknya pindah ke Hideout atau gunakan Focus untuk meningkatkan profit.';
+            }
+            
+            if(netProfit < 0) {
+                tips += ' WARNING: Rugi! Naikkan harga jual atau cari bahan lebih murah di market lain.';
+            }
+            
+            document.getElementById('tipsContent').textContent = tips;
+        }
+        
+        // Reset app
+        function resetApp() {
+            materials = [];
+            document.getElementById('itemName').value = '';
+            document.getElementById('sellPrice').value = '';
+            document.getElementById('craftAmount').value = '100';
+            document.getElementById('journalPrice').value = '';
+            renderMaterials();
+            goToStep(1);
+        }
+        
+        // Enter key support
+        document.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') {
+                if(currentStep === 3 && document.activeElement.id !== 'matName') {
+                    addMaterial();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
